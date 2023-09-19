@@ -132,6 +132,10 @@ def download_pdf_and_write_local(html_path: str,
     """
     
     import streamlit as st
+    import os
+    
+    working_dir = os.getcwd()
+    data_dir = working_dir + "/data"
     
     # Get HTTP response of a URL
     response = get_source(html_path, proxies)
@@ -139,9 +143,12 @@ def download_pdf_and_write_local(html_path: str,
     # Check to see if the HTTP response is actually for a PDF file
     if response.headers['Content-Type'] == 'application/pdf':
         # If the file is a PDF, write the contents to local_path
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+            
         with open(local_path, 'wb') as pdf:
             pdf.write(response.content)
-    
+
         if verbose:
             st.write(f"{local_path} written to disk")
             print(f"{local_path} written to disk")
@@ -254,7 +261,7 @@ def return_pdf_docs(links: list,
         # Cisco datasheets are available as both a HTML file and a PDF file.  Any datasheet that has a URL ending with .html can be accessed from the same URL if the .html is replaced with .pdf.  
         pdf_html_path = link.split(".html", 1)[0] + ".pdf"
         pdf_name = pdf_html_path.split("/")[-1]
-        pdf_local_path = f"./data_sheets/{pdf_name}"
+        pdf_local_path = f"./data/{pdf_name}"
         
         if pdf_name not in unique_pdf_names:
             # Download PDFs only if they haven't already been downloaded
