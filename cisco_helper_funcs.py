@@ -565,8 +565,8 @@ def process_llm_response(llm_response: dict,
     
     import streamlit as st
 
-    st.write('\n\Answer:')
-    print('\n\Answer:')    
+    st.write('\n\nAnswer:')
+    print('\n\nAnswer:')    
     st.write(llm_response['result'])
     print(llm_response['result'])
     if print_sources:
