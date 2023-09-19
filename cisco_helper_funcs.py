@@ -410,8 +410,8 @@ def return_new_docs(pdf_docs: list,
                 st.write(f'{filename} not found in database')
                 print(f'{filename} not found in database')
             new_docs.append(doc)
-    st.write(f"{len(new_docs)} new document(s) not found in database.")
-    print(f"{len(new_docs)} new document(s) not found in database.")
+    st.write(f"{len(new_docs)} new document(s) not already present in the database.")
+    print(f"{len(new_docs)} new document(s) not already present in the database.")
     
     return new_docs
 
