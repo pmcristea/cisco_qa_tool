@@ -115,9 +115,9 @@ def scrape_google(website_url: str,
 
 
 def download_pdf_and_write_local(html_path: str, 
-                                 local_path: dict, 
+                                 pdf_filename: str, 
                                  proxies=None, 
-                                 verbose=False) -> None:
+                                 verbose=False):
     """
     Initiates HTTP get request for the URL of a pdf file.  Writes the contents of the PDF file to local disk.
 
@@ -132,26 +132,23 @@ def download_pdf_and_write_local(html_path: str,
     """
     
     import streamlit as st
-    import os
     
-    working_dir = os.getcwd()
-    data_dir = working_dir + "/data"
+    temp_file_path = f"./{pdf_filename}"
     
     # Get HTTP response of a URL
     response = get_source(html_path, proxies)
     
     # Check to see if the HTTP response is actually for a PDF file
     if response.headers['Content-Type'] == 'application/pdf':
-        # If the file is a PDF, write the contents to local_path
-        if not os.path.exists(data_dir):
-            os.makedirs(data_dir)
-            
-        with open(local_path, 'wb') as pdf:
+        # If the file is a PDF, write the contents to local_path            
+        with open(temp_file_path, 'wb') as pdf:
             pdf.write(response.content)
-
+    
         if verbose:
-            st.write(f"{local_path} written to disk")
-            print(f"{local_path} written to disk")
+            st.write(f"{temp_file_path} written to disk")
+            print(f"{temp_file_path} written to disk")
+            
+        return temp_file_path
             
             
 def load_pdf_as_doc(html_path: str, local_path: str) -> list[langchain.schema.document.Document]:
@@ -263,37 +260,37 @@ def return_pdf_docs(links: list,
         # Cisco datasheets are available as both a HTML file and a PDF file.  Any datasheet that has a URL ending with .html can be accessed from the same URL if the .html is replaced with .pdf.  
         pdf_html_path = link.split(".html", 1)[0] + ".pdf"
         pdf_name = pdf_html_path.split("/")[-1]
-        pdf_local_path = f"./data/{pdf_name}"
+        #pdf_local_path = f"./data/{pdf_name}"
         
         if pdf_name not in unique_pdf_names:
             # Download PDFs only if they haven't already been downloaded
             unique_pdf_names.append(pdf_name)
             
-            download_pdf_and_write_local(pdf_html_path,
-                                         pdf_local_path,
-                                         proxies=proxies)
+            pdf_local_path = download_pdf_and_write_local(html_path=pdf_html_path,
+                                                      pdf_filename=pdf_name,
+                                                      proxies=proxies)
+            if pdf_local_path:
+                try:
+                    # Attempt to load the PDF file from a local path and return the PDF as a Langchain Document object
+                    pdf_doc = load_pdf_as_doc(local_path = pdf_local_path,
+                                              html_path = pdf_html_path)
 
-            try:
-                # Attempt to load the PDF file from a local path and return the PDF as a Langchain Document object
-                pdf_doc = load_pdf_as_doc(local_path = pdf_local_path,
-                                          html_path = pdf_html_path)
-                
-                if is_cisco_datasheet==True:
-                    # Add metadata if PDF is a Cisco datasheet
-                    pdf_doc = generate_cisco_metadata(pdf_doc)
-                    unique_pdf_docs.append(pdf_doc)
-                else:
-                    unique_pdf_docs.append(pdf_doc)
-                    
-                st.write(f"File {pdf_name} downloaded and successfully loaded.")
-                print(f"File {pdf_name} downloaded and successfully loaded.")
+                    if is_cisco_datasheet==True:
+                        # Add metadata if PDF is a Cisco datasheet
+                        pdf_doc = generate_cisco_metadata(pdf_doc)
+                        unique_pdf_docs.append(pdf_doc)
+                    else:
+                        unique_pdf_docs.append(pdf_doc)
 
-            except Exception as e:
-                #print(e)
-                if verbose:
-                    st.write(f"Error occurred: {link} not available as PDF file.")
-                    print(f"Error occurred: {link} not available as PDF file.")
-                # Cleanup step removing PDF file if it was written to disk but not able to be loaded
+                    st.write(f"File {pdf_name} downloaded and successfully loaded.")
+                    print(f"File {pdf_name} downloaded and successfully loaded.")
+
+                except Exception as e:
+                    #print(e)
+                    if verbose:
+                        st.write(f"Error occurred: {link} not available as PDF file.")
+                        print(f"Error occurred: {link} not available as PDF file.")
+                    # Cleanup step removing PDF file after being loaded as it isn't needed anymore
                 if os.path.exists(pdf_local_path):
                     os.remove(pdf_local_path)
         
