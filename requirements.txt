@@ -1,6 +1,6 @@
 streamlit
 langchain
 openai
-pinecone
+pinecone-client
 tiktoken
 requests-html
