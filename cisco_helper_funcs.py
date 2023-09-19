@@ -1,6 +1,6 @@
 from requests_html import HTMLResponse
 
-# import langchain
+import langchain
 
 # import streamlit as st
 
