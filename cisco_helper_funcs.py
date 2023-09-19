@@ -569,16 +569,28 @@ def process_llm_response(llm_response: dict,
     print('\n\nAnswer:')    
     st.write(llm_response['result'])
     print(llm_response['result'])
+    
     if print_sources:
         st.write('\n\nSources:')
         print('\n\nSources:')
-        for i, source in enumerate(llm_response["source_documents"], 1):
+        
+        unique_sources = []
+
+        for source in llm_response['source_documents']:
             source_url = source.metadata['source']
-            source_page_num = int(source.metadata['page'])
+            source_page = source.metadata['page']
+            sources = (source_url, source_page)
+            if sources not in unique_sources:
+                unique_sources.append(sources)
+        
+        for i, source in enumerate(unique_sources, 1):
+            source_url = source[0]
+            source_page_num = int(source[1])
             st.write(f"{i}. {source_url}#page={source_page_num} - Page {source_page_num}")
             print(f"{i}. {source_url}#page={source_page_num} - Page {source_page_num}")
-    st.write
+    st.write()
     print()
+    
     if print_chunks:
         st.write('\n\nChunks:')
         print('\n\nChunks:')
@@ -650,8 +662,10 @@ def cisco_qa_search_tool(product_question: str,
         st.write("No new links to add")
         print("No new links to add")
     
+    question_with_product_name = product_question + ' ' + product_name
+    
     llm_response = get_llm_response(vectordb, 
-                                    product_question,
+                                    question_with_product_name,
                                     top_n_chunks, 
                                     model)
     
