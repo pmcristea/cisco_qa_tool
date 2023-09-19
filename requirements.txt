@@ -1,0 +1,6 @@
+streamlit
+langchain
+openai
+pinecone
+tiktoken
+requests-html
