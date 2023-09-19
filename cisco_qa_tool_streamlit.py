@@ -27,4 +27,4 @@ with st.form('myform', clear_on_submit=True):
                                  print_chunks=False,
                                  model='gpt-3.5-turbo-16k', 
                                  proxies=None,
-                                 verbose=False)
+                                 verbose=True)
