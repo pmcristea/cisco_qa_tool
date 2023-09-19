@@ -252,6 +252,8 @@ def return_pdf_docs(links: list,
         unique_pdf_docs (list): A list of Langchain PDF documents
     """
     
+    import os
+    
     import streamlit as st
     
     unique_pdf_docs = []
