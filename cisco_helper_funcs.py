@@ -221,20 +221,22 @@ def generate_cisco_metadata(pdf_doc: list, verbose: bool = False) -> list:
 
         except ValueError as e:
             # If "collateral" isn't present in the split_url, don't generate any new metadata
-            failed = True
-            pass
-        
-        new_pages.append(page)
-            
-    if verbose:
-        if failed:
             st.write(f"Failed to get metadata for {pdf_html_path}")
             print(f"Failed to get metadata for {pdf_html_path}")
-        else:
-            st.write(f"""Product category: {pdf_doc[0].metadata["product_category"]}, \nProduct_name: {pdf_doc[0].metadata["product_name"]}, \nMetadata added for {pdf_doc[0].metadata["filename"]}.""")
-            print(f"""Product category: {pdf_doc[0].metadata["product_category"]}, \nProduct_name: {pdf_doc[0].metadata["product_name"]}, \nMetadata added for {pdf_doc[0].metadata["filename"]}.""")
+            if verbose:
+                st.write(e)
+                st.write(f"Failed to get metadata for {pdf_html_path}")
+                print(f"Failed to get metadata for {pdf_html_path}")              
+            break
+        
+        new_pages.append(page)
     
-    return new_pages
+    if len(new_pages)>0:
+        st.write(f"""Product category: {pdf_doc[0].metadata["product_category"]}, \nProduct_name: {pdf_doc[0].metadata["product_name"]}, \nMetadata added for {pdf_doc[0].metadata["filename"]}.""")
+        print(f"""Product category: {pdf_doc[0].metadata["product_category"]}, \nProduct_name: {pdf_doc[0].metadata["product_name"]}, \nMetadata added for {pdf_doc[0].metadata["filename"]}.""")
+        return new_pages
+    else:
+        return pdf_doc
 
 
 def return_pdf_docs(links: list, 
@@ -257,23 +259,29 @@ def return_pdf_docs(links: list,
     import streamlit as st
 
     unique_pdf_docs = []
-    unique_pdf_names = []
+    unique_pdf_paths = []
 
     for link in links:
         # Cisco datasheets are available as both a HTML file and a PDF file.  Any datasheet that has a URL ending with .html can be accessed from the same URL if the .html is replaced with .pdf.  
-        pdf_html_path = link.split(".html", 1)[0] + ".pdf"
+        if link.endswith(".pdf"):
+            pdf_html_path = link
+        else:
+            pdf_html_path = link.split(".html", 1)[0] + ".pdf"
+        
+        st.write(pdf_html_path)
         pdf_name = pdf_html_path.split("/")[-1]
         #pdf_local_path = f"./data/{pdf_name}"
         
-        if pdf_name not in unique_pdf_names:
+        if pdf_html_path not in unique_pdf_paths:
             # Download PDFs only if they haven't already been downloaded
-            unique_pdf_names.append(pdf_name)
+            unique_pdf_paths.append(pdf_html_path)
 
             try:
                 # Attempt to load the PDF file from a local path and return the PDF as a Langchain Document object
                 pdf_doc = download_pdf_and_return_doc(html_path=pdf_html_path,
                                                      pdf_filename=pdf_name,
-                                                     proxies=proxies)
+                                                     proxies=proxies,
+                                                     verbose=verbose)
 
                 if is_cisco_datasheet==True:
                     # Add metadata if PDF is a Cisco datasheet
@@ -291,8 +299,6 @@ def return_pdf_docs(links: list,
                 print(f"Error occurred: {link} not available as PDF file.")
                 if verbose:
                     st.write(e)
-                    st.write(f"Error occurred: {link} not available as PDF file.")
-                    print(f"Error occurred: {link} not available as PDF file.")
             #     # Cleanup step removing PDF file after being loaded as it isn't needed anymore
             # if os.path.exists(pdf_local_path):
             #     os.remove(pdf_local_path)
@@ -354,15 +360,18 @@ def return_new_links(links: list, vectordb, verbose: bool = False) -> list:
     new_links = []
 
     for url in links:
+        if url.endswith('.pdf'):
+            pdf_html_path = url
         # Find which urls in links match with PDF files already in the vectordb
-        pdf_html_path = url.split(".html", 1)[0] + ".pdf"
+        else:
+            pdf_html_path = url.split(".html", 1)[0] + ".pdf"
+        
         matches = vectordb.similarity_search(query=' ', 
                                              k=1, 
                                              filter={'source':pdf_html_path})
-
         # If any matches are found, it implies the PDF file exists in the vectordb and we can ignore the url
         if len(matches)>0:
-            pass
+            continue
         
          # If no matches are found, keep the URL so the PDF file can be added to vectordb later
         else:
