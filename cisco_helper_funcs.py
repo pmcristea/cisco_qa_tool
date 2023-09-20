@@ -111,10 +111,36 @@ def scrape_google(website_url: str,
     st.write(f"{len(links)} useful links found.")
     print(f"{len(links)} useful links found.")
     
-    return links
+    return links         
+            
+def load_pdf_as_doc(html_path: str, local_path, filename: str) -> list[langchain.schema.document.Document]:
+    """Loads PDF file from local_path and returns a list where each element is one page of the PDF file as a Langchain Document object.
+
+    Args:
+        html_path (string): URL where the PDF file was originally downloaded from
+        local_path (string): File path used to read the PDF file from local disk
+
+    Returns:
+        pdf_doc (list[langchain.schema.document.Document]): A list where each element is one page of the PDF file as a Langchain Document object
+    """
+    from langchain.document_loaders import PyPDFLoader
+    
+    # Load local PDF file into memory 
+    loader = PyPDFLoader(file_path=str(local_path))
+    
+    # Create a Langchain Document object for each page in the PDF file
+    pdf_doc = loader.load()
+    
+    # Add the URL where the PDF was downloaded from as metadata
+    for page in pdf_doc:
+        page.metadata['source'] = html_path
+        page.metadata['filename'] = filename
+        page.metadata['page'] = int(page.metadata['page']) + 1
+    
+    return pdf_doc
 
 
-def download_pdf_and_write_local(html_path: str, 
+def download_pdf_and_return_doc(html_path: str, 
                                  pdf_filename: str, 
                                  proxies=None, 
                                  verbose=False):
@@ -131,9 +157,13 @@ def download_pdf_and_write_local(html_path: str,
         new_pages (list): A list of pdf pages after Cisco metadata has been added
     """
     
-    import streamlit as st
+    import tempfile
+    import pathlib
     
-    temp_file_path = f"./{pdf_filename}"
+    import streamlit as st
+       
+    temp_dir = tempfile.TemporaryDirectory()
+    temp_file_path = pathlib.Path(temp_dir.name) / pdf_filename
     
     # Get HTTP response of a URL
     response = get_source(html_path, proxies)
@@ -143,39 +173,14 @@ def download_pdf_and_write_local(html_path: str,
         # If the file is a PDF, write the contents to local_path            
         with open(temp_file_path, 'wb') as pdf:
             pdf.write(response.content)
+            pdf_doc = load_pdf_as_doc(html_path, temp_file_path, pdf_filename)
+            
     
         if verbose:
             st.write(f"{temp_file_path} written to disk")
             print(f"{temp_file_path} written to disk")
             
-        return temp_file_path
-            
-            
-def load_pdf_as_doc(html_path: str, local_path: str) -> list[langchain.schema.document.Document]:
-    """Loads PDF file from local_path and returns a list where each element is one page of the PDF file as a Langchain Document object.
-
-    Args:
-        html_path (string): URL where the PDF file was originally downloaded from
-        local_path (string): File path used to read the PDF file from local disk
-
-    Returns:
-        pdf_doc (list[langchain.schema.document.Document]): A list where each element is one page of the PDF file as a Langchain Document object
-    """
-    from langchain.document_loaders import PyPDFLoader
-    
-    # Load local PDF file into memory 
-    loader = PyPDFLoader(file_path=local_path)
-    
-    # Create a Langchain Document object for each page in the PDF file
-    pdf_doc = loader.load()
-    
-    # Add the URL where the PDF was downloaded from as metadata
-    for page in pdf_doc:
-        page.metadata['source'] = html_path
-        page.metadata['filename'] = local_path.split("/")[-1]
-        page.metadata['page'] = int(page.metadata['page']) + 1
-    
-    return pdf_doc
+        return pdf_doc
 
 
 def generate_cisco_metadata(pdf_doc: list, verbose: bool = False) -> list:
@@ -249,10 +254,8 @@ def return_pdf_docs(links: list,
         unique_pdf_docs (list): A list of Langchain PDF documents
     """
     
-    import os
-    
     import streamlit as st
-    
+
     unique_pdf_docs = []
     unique_pdf_names = []
 
@@ -265,35 +268,32 @@ def return_pdf_docs(links: list,
         if pdf_name not in unique_pdf_names:
             # Download PDFs only if they haven't already been downloaded
             unique_pdf_names.append(pdf_name)
-            
-            pdf_local_path = download_pdf_and_write_local(html_path=pdf_html_path,
-                                                      pdf_filename=pdf_name,
-                                                      proxies=proxies)
-            if pdf_local_path:
-                try:
-                    # Attempt to load the PDF file from a local path and return the PDF as a Langchain Document object
-                    pdf_doc = load_pdf_as_doc(local_path = pdf_local_path,
-                                              html_path = pdf_html_path)
 
-                    if is_cisco_datasheet==True:
-                        # Add metadata if PDF is a Cisco datasheet
-                        pdf_doc = generate_cisco_metadata(pdf_doc)
-                        unique_pdf_docs.append(pdf_doc)
-                    else:
-                        unique_pdf_docs.append(pdf_doc)
+            try:
+                # Attempt to load the PDF file from a local path and return the PDF as a Langchain Document object
+                pdf_doc = download_pdf_and_return_doc(html_path=pdf_html_path,
+                                                     pdf_filename=pdf_name,
+                                                     proxies=proxies)
 
-                    st.write(f"File {pdf_name} downloaded and successfully loaded.")
-                    print(f"File {pdf_name} downloaded and successfully loaded.")
+                if is_cisco_datasheet==True:
+                    # Add metadata if PDF is a Cisco datasheet
+                    pdf_doc = generate_cisco_metadata(pdf_doc)
+                    unique_pdf_docs.append(pdf_doc)
+                else:
+                    unique_pdf_docs.append(pdf_doc)
+                    
+                st.write(f"File {pdf_name} downloaded and successfully loaded.")
+                print(f"File {pdf_name} downloaded and successfully loaded.")
 
-                except Exception as e:
-                    #print(e)
-                    if verbose:
-                        st.write(f"Error occurred: {link} not available as PDF file.")
-                        print(f"Error occurred: {link} not available as PDF file.")
-                    # Cleanup step removing PDF file after being loaded as it isn't needed anymore
-                if os.path.exists(pdf_local_path):
-                    os.remove(pdf_local_path)
-        
+            except Exception as e:
+                #print(e)
+                if verbose:
+                    st.write(f"Error occurred: {link} not available as PDF file.")
+                    print(f"Error occurred: {link} not available as PDF file.")
+            #     # Cleanup step removing PDF file after being loaded as it isn't needed anymore
+            # if os.path.exists(pdf_local_path):
+            #     os.remove(pdf_local_path)
+
     return unique_pdf_docs
 
 
