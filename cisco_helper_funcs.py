@@ -288,6 +288,7 @@ def return_pdf_docs(links: list,
             except Exception as e:
                 #print(e)
                 if verbose:
+                    st.write(e)
                     st.write(f"Error occurred: {link} not available as PDF file.")
                     print(f"Error occurred: {link} not available as PDF file.")
             #     # Cleanup step removing PDF file after being loaded as it isn't needed anymore
