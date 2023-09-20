@@ -4,3 +4,4 @@ openai
 pinecone-client
 tiktoken
 requests-html
+pypdf
