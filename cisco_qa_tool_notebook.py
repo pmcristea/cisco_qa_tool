@@ -85,7 +85,13 @@ def get_source(url: str, PROXIES: dict = None) -> HTMLResponse:
 
 
 # %%
-get_source("https://papir805.github.io")
+from functions.web_tools.py import scrape_google
+
+# %%
+response = get_source("https://papir805.github.io")
+
+# %%
+response.ok
 
 
 # %% [markdown]
@@ -152,9 +158,10 @@ def scrape_google(website_url: str,
     # Sort remaining links
     links.sort()
     
+    st.write(f"{len(links)} useful links found.")
     print(f"{len(links)} useful links found.")
     
-    return links
+    return links         
 
 
 # %%
@@ -283,10 +290,10 @@ weird_response.headers['Content-Type']
 # %%
 pdf_doc = download_pdf_and_return_doc("https://www.cisco.com/en/US/prod/collateral/routers/ps12558/ps12559/datasheet-c78-730862.pdf", f"datasheet-c78-730862.pdf", verbose=True)
 
-# %% jupyter={"outputs_hidden": true}
+# %%
 generate_cisco_metadata(pdf_doc)
 
-# %% jupyter={"outputs_hidden": true}
+# %%
 pdf_doc[0]
 
 
@@ -897,6 +904,12 @@ def cisco_qa_search_tool(product_question: str,
     
     return processed_response
 
+
+# %%
+if 0:
+    print('a')
+else:
+    print('b')
 
 # %% [markdown]
 # # catalyst 2500 wireless controller

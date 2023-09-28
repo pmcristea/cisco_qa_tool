@@ -164,6 +164,7 @@ def download_pdf_and_return_doc(html_path: str,
        
     temp_dir = tempfile.TemporaryDirectory()
     temp_file_path = pathlib.Path(temp_dir.name) / pdf_filename
+    temp_file_path_string = str(temp_file_path)
     
     # Get HTTP response of a URL
     response = get_source(html_path, proxies)
@@ -173,7 +174,7 @@ def download_pdf_and_return_doc(html_path: str,
         # If the file is a PDF, write the contents to local_path            
         with open(temp_file_path, 'wb') as pdf:
             pdf.write(response.content)
-            pdf_doc = load_pdf_as_doc(html_path, temp_file_path, pdf_filename)
+            pdf_doc = load_pdf_as_doc(html_path, temp_file_path_string, pdf_filename)
             
     
         if verbose:
