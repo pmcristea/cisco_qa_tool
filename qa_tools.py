@@ -60,3 +60,39 @@ def return_new_links(links: list,
     logger.info(f"{num_new_links} links not connected to any PDFs in the vectordb.")
     
     return new_links
+
+
+def return_new_docs(pdf_docs: list, 
+                    vectordb: langchain.vectorstores.pinecone.Pinecone) -> list:
+    """Checks whether any of the filenames of pdf_docs match a pdf already in the vectordb.  Any documents found to match are ignored as they imply the document already exists in the vectordb and doesn't need to be added again.
+
+    Args:
+        docs: a list of LangChain Document objects
+        vectordb: a vectordatabase
+    
+    Returns:
+        new_docs: a list of LangChain Document objects not already present in vectordb.
+    """
+    
+    new_docs = []
+    
+    # Check if any pdf_docs have a filename that already exist in vectordb.
+    for doc in pdf_docs:
+        filename = doc[0].metadata['filename']
+        matches =  vectordb.similarity_search(query=' ',k=1,filter=
+                                        {
+                                            "filename": {"$eq": filename}
+                                        }
+                                             )
+        # If any matches are present, the doc already exists in the vectordb and can be ignored 
+        if len(matches) > 0:
+            pass
+        
+        # If no matches are found, keep the doc so it can be added to vectordb later
+        else:
+            logger.debug(f'{filename} PDF document not found in database.')
+            new_docs.append(doc)
+            
+    logger.info(f"{len(new_docs)} new document(s) not already present in the database.")
+    
+    return new_docs
