@@ -67,3 +67,26 @@ def return_pinecone_vectorstore(index_name: str,
     logger.info("Connection established with Pinecone vectorstore.")
 
     return vectordb
+
+
+def token_counter(text: str) -> int:
+    """
+    Counts the number of tokens in a string
+
+    Args:
+        text: the string to count the number of tokens from
+
+    Returns:
+        num_tokens: number of tokens present in text
+    """
+    
+    import tiktoken
+    
+    tokenizer = tiktoken.get_encoding('cl100k_base')
+    
+    tokens = tokenizer.encode(text,
+                              disallowed_special=()
+                             )
+    num_tokens = len(tokens)
+    
+    return num_tokens
