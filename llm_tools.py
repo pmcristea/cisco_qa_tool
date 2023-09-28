@@ -77,3 +77,57 @@ Answer:
     llm_response = qa_chain(product_question)
     
     return llm_response
+
+
+
+def process_llm_response(llm_response: dict, 
+                         print_sources: bool = False, 
+                         print_chunks: bool = False) -> None:
+    """Prints the answer to a llm query.  Additionally print the URL of any source document used to answer the question, as well as which chunks from that source document were used.
+
+    Args:
+        llm_response: Containing the response to a llm query and which source documents and chunks were used.
+        print_sources: Specifies whether to print the source documents in llm_response.
+        print_chunks: Specifies whether to print the chunks in llm_response.
+
+    Returns:
+        None
+    """
+
+    st.write('\n\nAnswer:')
+    logger.info('\n\nAnswer:')    
+    st.write(llm_response['result'])
+    logger.info(llm_response['result'])
+    
+    if print_sources:
+        st.write('\n\nSources:')
+        logger.info('\n\nSources:')
+        
+        unique_sources = []
+        
+        for source in llm_response['source_documents']:
+            source_url = source.metadata['source']
+            source_page = source.metadata['page']
+            sources = (source_url, source_page)
+            if sources not in unique_sources:
+                unique_sources.append(sources)
+        
+        for i, source in enumerate(unique_sources, 1):
+            source_url = source[0]
+            source_page_num = int(source[1])
+            st.write(f"{i}. {source_url}#page={source_page_num} - Page {source_page_num}")
+            logger.info(f"{i}. {source_url}#page={source_page_num} - Page {source_page_num}")
+    st.write()
+    
+    if print_chunks:
+        st.write('\n\nChunks:')
+        logger.info('\n\nChunks:')
+        for i, chunk in enumerate(llm_response["source_documents"], 1):
+            st.write(f'----------Chunk {i}----------')
+            st.write(chunk.page_content)
+            st.write()
+            logger.info(f'----------Chunk {i}----------')
+            logger.info(chunk.page_content)
+            logger.info()
+            
+    return None
