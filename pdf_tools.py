@@ -1,6 +1,6 @@
 import logging
 
-import langchain
+from langchain.schema.document import Document
 
 import streamlit as st
 
@@ -24,7 +24,7 @@ logger.addHandler(stream_handler)
 
 def load_pdf_as_doc(html_path: str, 
                     local_path: str, 
-                    filename: str) -> list:
+                    filename: str) -> list[Document]:
     """Loads PDF file from local_path and generates metadata for each page of the document.
 
     Args:
@@ -63,7 +63,7 @@ def load_pdf_as_doc(html_path: str,
 
 def download_pdf_and_return_doc(html_path: str, 
                                 pdf_filename: str, 
-                                proxies=None) -> list:
+                                proxies=None) -> list[Document]:
     """
     Initiates HTTP get request for the URL of a pdf file.  Writes the contents of the PDF file to local disk.
 
@@ -111,7 +111,7 @@ def download_pdf_and_return_doc(html_path: str,
         
         
 
-def generate_cisco_metadata(pdf_doc: list) -> list:
+def generate_cisco_metadata(pdf_doc: list[Document]) -> list[Document]:
     """Extracts information from the URL of a data sheet pulled from www.cisco.com to be used as metadata in the document.
 
     Args:
@@ -164,7 +164,7 @@ def generate_cisco_metadata(pdf_doc: list) -> list:
     
 def return_pdf_docs(links: list, 
                     proxies: dict = None,
-                    is_cisco_datasheet: bool = False) -> list:
+                    is_cisco_datasheet: bool = False) -> list[Document]:
     """
     Download PDFs from URLs, load from local disk as Langchain Documents and add metadata.  Filters URLs so that duplicate PDF files are ignored.
 
