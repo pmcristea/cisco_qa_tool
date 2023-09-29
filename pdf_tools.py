@@ -63,7 +63,7 @@ def load_pdf_as_doc(html_path: str,
 
 def download_pdf_and_return_doc(html_path: str, 
                                 pdf_filename: str, 
-                                proxies=None) -> list[langchain.schema.document.Document]:
+                                proxies=None) -> list:
     """
     Initiates HTTP get request for the URL of a pdf file.  Writes the contents of the PDF file to local disk.
 
@@ -111,7 +111,7 @@ def download_pdf_and_return_doc(html_path: str,
         
         
 
-def generate_cisco_metadata(pdf_doc: list) -> list[langchain.schema.document.Document]:
+def generate_cisco_metadata(pdf_doc: list) -> list:
     """Extracts information from the URL of a data sheet pulled from www.cisco.com to be used as metadata in the document.
 
     Args:
@@ -164,7 +164,7 @@ def generate_cisco_metadata(pdf_doc: list) -> list[langchain.schema.document.Doc
     
 def return_pdf_docs(links: list, 
                     proxies: dict = None,
-                    is_cisco_datasheet: bool = False) -> list[langchain.schema.document.Document]:
+                    is_cisco_datasheet: bool = False) -> list:
     """
     Download PDFs from URLs, load from local disk as Langchain Documents and add metadata.  Filters URLs so that duplicate PDF files are ignored.
 
