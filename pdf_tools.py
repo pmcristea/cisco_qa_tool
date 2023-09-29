@@ -24,7 +24,7 @@ logger.addHandler(stream_handler)
 
 def load_pdf_as_doc(html_path: str, 
                     local_path: str, 
-                    filename: str) -> list[langchain.schema.document.Document]:
+                    filename: str) -> list:
     """Loads PDF file from local_path and generates metadata for each page of the document.
 
     Args:
