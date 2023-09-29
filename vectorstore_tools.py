@@ -1,6 +1,6 @@
 import logging
 
-import langchain
+from langchain.vectorstores.pinecone import Pinecone
 
 import streamlit as st
 
@@ -22,7 +22,7 @@ logger.addHandler(stream_handler)
 
 def return_pinecone_vectorstore(index_name: str, 
                                 model_name: str = 'text-embedding-ada-002'
-                               ) -> langchain.vectorstores.pinecone.Pinecone:
+                               ) -> Pinecone:
     """
     Establishes a connection to a Pinecone vectorstore 
 
@@ -93,7 +93,7 @@ def token_counter(text: str) -> int:
 
 
 def batch_and_add_texts(texts: list,
-                        vectordb: langchain.vectorstores.pinecone.Pinecone) -> None:
+                        vectordb: Pinecone) -> None:
     """
     OpenAI enforces a token/min limit for embedding tokens. This function avoids hitting that limit by splitings texts into batches less than or equal to the token_limit.  After each batch is embedded and added to the vectorstore, the program waits 60 seconds to avoid hitting the limit.
 
