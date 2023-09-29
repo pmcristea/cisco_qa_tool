@@ -134,6 +134,6 @@ def process_llm_response(llm_response: dict,
             st.write()
             logger.info(f'----------Chunk {i}----------')
             logger.info(chunk.page_content)
-            logger.info()
+            logger.info('')
             
     return None

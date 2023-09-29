@@ -96,14 +96,17 @@ product_name_input = st.text_input('Enter the name of the product you have a que
 query_input = st.text_input(f'Enter your question about the product:', placeholder = 'What do you want to ask about the product?')
 
 result = []
-with st.form('myform', clear_on_submit=True):
+with st.form('myform', clear_on_submit=False):
     submitted = st.form_submit_button('Submit', disabled=not(product_name_input and query_input))
+    top_n_chunks = st.slider("Use top n sources", min_value=1, max_value=8, value=5, key='n_chunks_slider')
+    print_sources = st.checkbox("Print sources?", key='print_sources_checkbox')
+    print_chunks = st.checkbox("Print chunks?", key='print_chunks_checkbox')
     if submitted:
         with st.spinner(f"Please be patient, it may take some time to get your answer.  If no documents pertaining to your question are currently present in the knowledge base, they'll have to be added."):
             cisco_qa_search_tool(product_question=query_input,
                                  product_name=product_name_input,
-                                 top_n_chunks = 10,
-                                 print_sources=True,
-                                 print_chunks=False,
+                                 top_n_chunks = top_n_chunks,
+                                 print_sources=print_sources,
+                                 print_chunks=print_chunks,
                                  model='gpt-4', 
                                  proxies=None)
