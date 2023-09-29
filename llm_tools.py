@@ -1,5 +1,7 @@
 import logging
 
+import langchain
+
 import streamlit as st
 
 logger = logging.getLogger(__name__)
@@ -22,15 +24,18 @@ logger.addHandler(stream_handler)
 
 def get_llm_response(vectordb: langchain.vectorstores.pinecone.Pinecone, 
                      product_question: str,
+                     product_name: str,
                      top_k_chunks: int, 
                      model: str) -> dict:
     """Returns a dictionary containing information about a query to a LLM.  The dictionary contains the product_question itself, the LLM's response to the product_question, and the chunks that were pulled from vectordb to answer the question.
 
     Args:
         vectordb: a vectordatabase containing source documents used to answer product_question
+        product_question: A question you want answered about a video game
+        product_name: The name of the product being asked about
         top_n_chunks: How many chunks are retrieved from the vector store to be used in answering the product_question
         model: Name of the LLM model to use
-        product_question: A question you want answered about a video game
+
     
     Returns:
         llm_response: 
@@ -71,10 +76,11 @@ Answer:
                                     chain_type_kwargs=chain_type_kwargs
                                     )
     
-    st.write(f"Searching knowledgebase for answer to {product_question}")
+    question_with_product_name = product_question + ' ' + product_name
+    st.write(f"Searching knowledgebase for answer to:\n {product_question}\n\nFor product: {product_name}")
     
     # Generate response to product_question
-    llm_response = qa_chain(product_question)
+    llm_response = qa_chain(question_with_product_name)
     
     return llm_response
 

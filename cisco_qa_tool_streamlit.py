@@ -36,7 +36,7 @@ def cisco_qa_search_tool(product_question: str,
                          top_n_chunks: int = 5, 
                          print_sources: bool = False, 
                          print_chunks: bool = False, 
-                         model:str = 'gpt-3.5-turbo',
+                         model:str = 'gpt-4',
                          proxies: dict = None):
     """
     
@@ -45,15 +45,13 @@ def cisco_qa_search_tool(product_question: str,
     
     links = scrape_google(website_url="www.cisco.com",
                           product_name=product_name, 
-                          additional_search_keywords="data sheets",
-                          PROXIES=proxies,
-                          verbose=verbose)
+                          additional_search_text="data sheets",
+                          PROXIES=proxies)
     
     vectordb = return_pinecone_vectorstore(index_name)
     
     new_links = return_new_links(links, 
-                                 vectordb, 
-                                 verbose=verbose)
+                                 vectordb)
 
     num_new_links = len(new_links)
     
@@ -74,11 +72,11 @@ def cisco_qa_search_tool(product_question: str,
     else:
         st.write("No new links to add")
         logger.info("No new links to add")
-    
-    question_with_product_name = product_question + ' ' + product_name
+        
     
     llm_response = get_llm_response(vectordb, 
-                                    question_with_product_name,
+                                    product_question,
+                                    product_name,
                                     top_n_chunks, 
                                     model)
     
