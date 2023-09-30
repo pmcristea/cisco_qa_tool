@@ -67,11 +67,11 @@ def cisco_qa_search_tool(product_question: str,
             batch_and_add_texts(new_docs, vectordb)
             
         else:
-            st.write("No new docs to add")
-            logger.info("No new docs to add")
+            st.write("No new docs to add.  All relevant datasheets already exist in the knowledgebase.")
+            logger.info("No new docs to add.  All relevant datasheets already exist in the knowledgebase.")
     else:
-        st.write("No new links to add")
-        logger.info("No new links to add")
+        st.write("No new links to add.  All Google search result URLs correspond to datasheets that already exist in the knowledgebase.")
+        logger.info("No new links to add.  All Google search result URLs correspond to datasheets that already exist in the knowledgebase.")
         
     
     llm_response = get_llm_response(vectordb, 
@@ -98,7 +98,7 @@ query_input = st.text_input(f'Enter your question about the product:', placehold
 result = []
 with st.form('myform', clear_on_submit=False):
     submitted = st.form_submit_button('Submit', disabled=not(product_name_input and query_input))
-    top_n_chunks = st.slider("Use top n sources", min_value=1, max_value=8, value=5, key='n_chunks_slider')
+    top_n_chunks = st.slider("Use top n sources", min_value=3, max_value=10, value=8, key='n_chunks_slider')
     print_sources = st.checkbox("Print sources?", value=True, key='print_sources_checkbox')
     print_chunks = st.checkbox("Print chunks?", key='print_chunks_checkbox')
     if submitted:
