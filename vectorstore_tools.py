@@ -151,4 +151,4 @@ def batch_and_add_texts(texts: list,
         logger.info(f"Inserted {pages_inserted} pages into database.  No pages remaining.")
         vectordb.add_documents(batched_pages)
     
-    logger.info("Process completed.")
+    logger.info("Process completed.  All pages have been batched and inserted into knowledgebase.")

@@ -2,7 +2,7 @@ import logging
 
 from langchain.schema.document import Document
 
-import streamlit as st
+import streamlit as st 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
