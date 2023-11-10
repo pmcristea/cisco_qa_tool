@@ -49,15 +49,16 @@ def return_pinecone_vectorstore(index_name: str,
 
     # Check if the index already exists.  If it doesn't, then create one 
     if index_name not in pinecone.list_indexes():
-        st.write(f"Creating Pinecone Index called {index_name}.  Please be patient as this takes 90 seconds..") 
-        logger.debug(f"Creating Pinecone Index called {index_name}.  Please be patient as this takes 90 seconds..")   
+        st.write(f"Creating Pinecone Index called {index_name}.  Please be patient as this takes 90 seconds...") 
+        logger.debug(f"Creating Pinecone Index called {index_name}.  Please be patient as this takes 90 seconds...")   
         pinecone.create_index(
             name=index_name,
             metric='cosine',
             dimension=1536
         )
-               
-        time.sleep(30)
+        wait_time = 60
+        logger.debug(f"Starting {wait_time} second timer.")      
+        time.sleep(wait_time)
         
     # Specify which vector embedding model to use
     embedding = OpenAIEmbeddings(model=model_name)
