@@ -54,7 +54,8 @@ def return_pinecone_vectorstore(index_name: str,
             dimension=1536
         )
         
-        logger.debug(f"New Pinecone Index called {index_name} created.")
+        logger.debug(f"Creating Pinecone Index called {index_name}.  Please be patient as this takes 90 seconds..")          
+        time.sleep(90)
         
     # Specify which vector embedding model to use
     embedding = OpenAIEmbeddings(model=model_name)

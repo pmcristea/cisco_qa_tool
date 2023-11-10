@@ -99,7 +99,7 @@ result = []
 with st.form('myform', clear_on_submit=False):
     submitted = st.form_submit_button('Submit', disabled=not(product_name_input and query_input))
     top_n_chunks = st.slider("Use top n sources", min_value=3, max_value=10, value=8, key='n_chunks_slider')
-    print_sources = st.checkbox("Print sources?", value=True, key='print_sources_checkbox')
+    print_sources = st.checkbox("Print sources", value=True, key='print_sources_checkbox')
     #print_chunks = st.checkbox("Print chunks?", key='print_chunks_checkbox')
     if submitted:
         with st.spinner(f"Please be patient, it may take some time to get your answer.  If no documents pertaining to your question are currently present in the knowledge base, they'll have to be added."):
