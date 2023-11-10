@@ -37,6 +37,7 @@ def return_pinecone_vectorstore(index_name: str,
         
     import pinecone
     import os
+    import time
     from langchain.vectorstores import Pinecone
     from langchain.embeddings import OpenAIEmbeddings
     
