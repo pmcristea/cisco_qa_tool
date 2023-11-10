@@ -49,13 +49,16 @@ def return_pinecone_vectorstore(index_name: str,
 
     # Check if the index already exists.  If it doesn't, then create one 
     if index_name not in pinecone.list_indexes():
-        st.write(f"Sorry, but a Pinecone Index has to be created in order to answer your question.  Please be patient as this takes about 2 minutes...") 
+        st.write(f"Sorry, but the knowledge base has to be created in order to answer your question.  Please be patient as this takes about 2 minutes...") 
         logger.debug(f"Creating Pinecone Index called {index_name}.")   
+        
         pinecone.create_index(
             name=index_name,
             metric='cosine',
-            dimension=1536
+            dimension=1536,
+            source_collection=index_name
         )
+        
         wait_time = 30
         logger.debug(f"Starting {wait_time} second timer.")      
         time.sleep(wait_time)
