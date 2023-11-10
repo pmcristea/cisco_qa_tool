@@ -54,9 +54,9 @@ def return_pinecone_vectorstore(index_name: str,
             metric='cosine',
             dimension=1536
         )
-        
+        st.write(f"Creating Pinecone Index called {index_name}.  Please be patient as this takes 90 seconds..")   
         logger.debug(f"Creating Pinecone Index called {index_name}.  Please be patient as this takes 90 seconds..")          
-        time.sleep(90)
+        #time.sleep(90)
         
     # Specify which vector embedding model to use
     embedding = OpenAIEmbeddings(model=model_name)
