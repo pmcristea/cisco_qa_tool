@@ -63,9 +63,9 @@ def return_pinecone_vectorstore(index_name: str,
         api_key=os.getenv("PINECONE_API_KEY"), # find at app.pinecone.io
         environment=os.getenv("PINECONE_ENV"), # next to api key in console
     )
-        # wait_time = 30
-        # logger.debug(f"Starting {wait_time} second timer.")      
-        # time.sleep(wait_time)
+        wait_time = 5
+        logger.debug(f"Starting {wait_time} second timer.")      
+        time.sleep(wait_time)
         
     # Specify which vector embedding model to use
     embedding = OpenAIEmbeddings(model=model_name)
